@@ -15,17 +15,31 @@
 //    A(NxT)  *  B (TxN) = C
 //-----------------------------
 
+void run_naive(int N, int T);
+void run_opt(int N, int T);
+
+
 int main (int argc, char *argv[])
 {
 	if (argc !=  2){
 		printf("Type ./mm N(datalen)\n");
 		exit(1);
 	}	
-	
 
 	int N = atoi(argv[1]); // row
 	int T = N; // col
 
+	run_naive(N,T);
+
+	run_opt(N,T);
+
+
+
+	return  0;
+}
+
+void run_naive(int N, int T)
+{
 	float *A;
 	A = (float*)malloc(sizeof(float)*N*T);
 	init_2d_f(A,N,T,1.f);
@@ -151,6 +165,17 @@ int main (int argc, char *argv[])
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
 
+	err = clEnqueueNDRangeKernel(queue, kernel[0], 2, NULL, globalsize, localsize, 0, NULL, NULL);
+	OCL_CHECK(err);
+
+	clFinish(queue);
+
+	clEnqueueReadBuffer(queue, C_d, CL_TRUE, 0, sizeof(float)*N*N, C, 0, NULL , NULL);
+
+	puts("C");
+	check_2d_f(C,N,N);
+
+
 
 	// free
 	clReleaseMemObject(A_d);	
@@ -175,7 +200,15 @@ int main (int argc, char *argv[])
 	free(B);
 	free(C);
 
-	return  0;
+	return;
 }
 
 
+void run_opt(int N, int T)
+{
+
+
+
+
+	return;
+}
