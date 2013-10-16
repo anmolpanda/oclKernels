@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -g  -Wall -O3  #-DDEBUG
+CCFLAGS = -g  -Wall -O3  -DDEBUG
 CL_FLAGS = -lOpenCL 
 OPT = -lm -lrt
 

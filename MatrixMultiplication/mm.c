@@ -30,9 +30,9 @@ int main (int argc, char *argv[])
 	int N = atoi(argv[1]); // row
 	int T = N; // col
 
-	run_naive(N,T);
+	//run_naive(N,T);
 
-	//run_opt(N,T);
+	run_opt(N,T);
 
 
 
@@ -224,15 +224,19 @@ void run_opt(int N, int T)
 	A = (float*)malloc(sizeof(float)*N*T);
 	init_2d_f(A,N,T,1.f);
 
+#ifdef DEBUG
 	puts("A");
 	check_2d_f(A,N,T);
+#endif
 
 	float *B;
 	B = (float*)malloc(sizeof(float)*T*N);
 	init_2d_f(B,T,N,2.f);
 
+#ifdef DEBUG
 	puts("B");
 	check_2d_f(B,T,N);
+#endif
 
 	float *C;
 	C = (float*)malloc(sizeof(float)*N*N);
@@ -361,8 +365,10 @@ void run_opt(int N, int T)
 
 	clEnqueueReadBuffer(queue, C_d, CL_TRUE, 0, sizeof(float)*N*N, C, 0, NULL , NULL);
 
+#ifdef DEBUG
 	puts("C");
 	check_2d_f(C,N,N);
+#endif
 
 
 

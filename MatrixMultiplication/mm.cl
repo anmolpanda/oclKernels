@@ -51,7 +51,7 @@ __kernel void matrix_mul(
 	int Row =  bx * TILE + tx;
 	int Col =  by * TILE + ty;
 
-	float sum;
+	float sum = 0.f;	
 
 	int m,k ;
 
@@ -62,7 +62,6 @@ __kernel void matrix_mul(
 	
 		barrier(CLK_LOCAL_MEM_FENCE);
 
-		sum = 0.f;	
 
 		for ( k = 0; k < TILE ; ++ k) 
 		{
