@@ -7,16 +7,16 @@
 
 #include <CL/opencl.h>
 
-#include "../Utils/c_utils.h"
-#include "../Utils/ocl_utils.h"
+#include "../../Utils/c_utils.h"
+#include "../../Utils/ocl_utils.h"
 
 
 //-----------------------------
 //    A(NxT)  *  B (TxN) = C
 //-----------------------------
 
-void run1(int N, int T);
-void run2(int N, int T);
+void run1(int N);
+//void run2(int N, int T);
 
 
 int main (int argc, char *argv[])
@@ -52,6 +52,9 @@ void run1(int N)
 
 	float *C;
 	C = (float*)malloc(sizeof(float)*N*N);
+
+	float *sum;
+	sum = (float*)malloc(sizeof(float));
 
 	int NumK = 1;
 	int NumE = 2;
@@ -127,48 +130,70 @@ void run1(int N)
 
 
 	// memory on device
-	cl_mem A_d = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
-	cl_mem C_d = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
+	cl_mem A_d   = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
+	cl_mem C_d   = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
+	cl_mem sum_d = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float),      NULL, NULL);
 
 	// Initialize device memory
-	err = clEnqueueWriteBuffer(queue, A_d, 	CL_TRUE, 0, sizeof(float)*N*N, 	A, 0, NULL, NULL); 
+	err = clEnqueueWriteBuffer(queue, A_d, 	CL_TRUE, 0, sizeof(float)*N*N, 	A, 0, NULL, &event[0]); 
 	OCL_CHECK(err);
 
 	size_t localsize;
 	size_t globalsize;
 
-	localsize = 256;
-	globalsize = ((N+255)/256)*256;
+	localsize = 64;
+	globalsize = ((N+63)/64)*64;
 
 	err  = clSetKernelArg(kernel[0], 0, sizeof(cl_mem), &A_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
-	err  = clSetKernelArg(kernel[0], 1, sizeof(cl_mem), &B_d);
+
+	err  = clSetKernelArg(kernel[0], 1, sizeof(cl_mem), &C_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
-	err  = clSetKernelArg(kernel[0], 2, sizeof(cl_mem), &C_d);
+
+	err  = clSetKernelArg(kernel[0], 2, sizeof(cl_mem), &sum_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
-	err  = clSetKernelArg(kernel[0], 3, sizeof(int), &N);
+
+	err  = clSetKernelArg(kernel[0], 3, sizeof(float)*64, NULL);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
-	err  = clSetKernelArg(kernel[0], 4, sizeof(int), &T);
+
+	err  = clSetKernelArg(kernel[0], 4, sizeof(int), &N);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
 
-	err = clEnqueueNDRangeKernel(queue, kernel[0], 2, NULL, globalsize, localsize, 0, NULL, NULL);
+	err = clEnqueueNDRangeKernel(queue, kernel[0], 1, NULL, &globalsize, &localsize, 0, NULL, NULL);
 	OCL_CHECK(err);
 
 	clFinish(queue);
 
-	clEnqueueReadBuffer(queue, C_d, CL_TRUE, 0, sizeof(float)*N*N, C, 0, NULL , NULL);
+	clEnqueueReadBuffer(queue, sum_d, CL_TRUE, 0, sizeof(float), sum, 0, NULL , &event[1]);
+
+	err = clWaitForEvents(1,&event[1]);
+	OCL_CHECK(err);
+
+	err = clGetEventProfilingInfo (event[0], CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &gstart, NULL);
+	OCL_CHECK(err);
+
+	err = clGetEventProfilingInfo (event[1], CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &gend, NULL);
+	OCL_CHECK(err);
+
+	gpuTime = (double)(gend -gstart)/1000000000.0;
+
+	printf("oclTime = %lf (s)\n", gpuTime );
+
+
+	printf("sum = %f\n", sum[0]);
 
 #ifdef DEBUG
-	puts("C");
-	check_2d_f(C,N,N);
+	//puts("C");
+	//check_2d_f(C,N,N);
+
 #endif
 
 
 	// free
 	clReleaseMemObject(A_d);	
-	clReleaseMemObject(B_d);
 	clReleaseMemObject(C_d);
+	clReleaseMemObject(sum_d);
 
 
 	clReleaseProgram(program);
@@ -185,8 +210,8 @@ void run1(int N)
 
 
 	free(A);
-	free(B);
 	free(C);
+	free(sum);
 
 	return;
 }
@@ -194,7 +219,7 @@ void run1(int N)
 //---------------
 // use shared mem
 //---------------
-
+/*
 void run_opt(int N, int T)
 {
 
@@ -377,3 +402,4 @@ void run_opt(int N, int T)
 
 	return;
 }
+*/

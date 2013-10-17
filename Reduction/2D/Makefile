@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -g  -Wall -O3  -DDEBUG
+CCFLAGS = -g  -Wall -O3  #-DDEBUG
 CL_FLAGS = -lOpenCL 
 OPT = -lm -lrt
 
@@ -42,11 +42,11 @@ all: c_utils.o ocl_utils.o 2d_reduction
 #--------------
 # build objects
 #--------------
-c_utils.o: ../Utils/c_utils.h ../Utils/c_utils.c 
-	$(CC) $(CCFLAGS) -c ../Utils/c_utils.c -o ../Utils/c_utils.o  $(OPT)
+c_utils.o: ../../Utils/c_utils.h ../../Utils/c_utils.c 
+	$(CC) $(CCFLAGS) -c ../../Utils/c_utils.c -o ../../Utils/c_utils.o  $(OPT)
 
-ocl_utils.o: ../Utils/ocl_utils.h ../Utils/ocl_utils.c 
-	$(CC) $(CCFLAGS) $(CL_INCLUDE) $(CL_LIBPATH) -c ../Utils/ocl_utils.c -o ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
+ocl_utils.o: ../../Utils/ocl_utils.h ../../Utils/ocl_utils.c 
+	$(CC) $(CCFLAGS) $(CL_INCLUDE) $(CL_LIBPATH) -c ../../Utils/ocl_utils.c -o ../../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
 
 
 
@@ -54,9 +54,9 @@ ocl_utils.o: ../Utils/ocl_utils.h ../Utils/ocl_utils.c
 # build programs 
 #--------------
 2d_reduction:  2d_reduction.c
-	$(CC) $(CCFLAGS) $(CL_INCLUDE) $(CL_LIBPATH) 2d_reduction.c -o 2d_reduction ../Utils/c_utils.o  ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
+	$(CC) $(CCFLAGS) $(CL_INCLUDE) $(CL_LIBPATH) 2d_reduction.c -o 2d_reduction ../../Utils/c_utils.o  ../../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
 
 
 .PHONY: clean
 clean:
-	rm -rf $(PROG) ../Utils/*.o 
+	rm -rf $(PROG) ../../Utils/*.o 
