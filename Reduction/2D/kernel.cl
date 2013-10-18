@@ -3,10 +3,10 @@
 
 
 #define TILE 64
+#define TILE16 16
 
 __kernel void reduction_1(
 		__global float *A, 
-		//__global float *C, 
 		__global float *sum,
 		__local  volatile float *sm,
 		const int N,
@@ -75,7 +75,6 @@ __kernel void reduction_1(
 
 __kernel void reduction_2a(
 		__global float *A, 
-		// __global float *C, 
 		__global float *sum,
 		__local  volatile float *sm,
 		const int N,
@@ -259,56 +258,129 @@ __kernel void reduction_3b(
 }
 
 
+__kernel void reduction_4a(
+		__global float *A, 
+		__global float *intersum,
+		__global float *sum,
+		__local  volatile float *sm, // 256 
+		const int N,
+		const int blks)
+{
+	int gx = get_global_id(0); // row
+	int gy = get_global_id(1); // col
+
+	int bx = get_group_id(0);
+	//int by = get_group_id(1);
+
+	int tx = get_local_id(0);
+	int ty = get_local_id(1);
 
 
+	int tid =  tx * TILE16 + ty;
 
+
+	// loop through columns		
+	int m;	
+	float v = 0.f;
+
+	#pragma unroll
+	for ( m = 0; m < blks; ++m)
+	{
+		v += A[gx * N + m * TILE16 + gy];	
+	}
+
+	sm[tid] = v;
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if(tid < 128){
+		sm[tid] += sm[tid + 128];
+	}
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if(tid < 64){
+		sm[tid] += sm[tid + 64];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if(tid < 32){
+		sm[tid] += sm[tid + 32];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+
+	if(tid < 16){
+		sm[tid] += sm[tid + 16];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+/*
+	if(tid < 8){
+		sm[tid] += sm[tid + 8];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+	if(tid < 4){
+		sm[tid] += sm[tid + 4];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if(tid < 2){
+		sm[tid] += sm[tid + 2];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if(tid < 1){
+		sm[tid] += sm[tid + 1];
+	}
+	barrier(CLK_LOCAL_MEM_FENCE);
+*/
 
 
 /*
-   __kernel void matrix_mul(
-   __global float *A, 
-   __global float *B, 
-   __global float *C, 
-   __local  float *sma, /// 16 x 16
-   __local  float *smb,
-   const int N, 
-   const int T)
-   {
-// A [Row][m*TILE+ty]
-// B [m*TILE+tx][Col] 
-int gx = get_global_id(0); 
-int gy = get_global_id(1);
+	if ( tid < 32) 
+	{
+		sm[tid] += sm[tid + 32];
+		sm[tid] += sm[tid + 16];
+		sm[tid] += sm[tid +  8];
+		sm[tid] += sm[tid +  4];
+		sm[tid] += sm[tid +  2];
+		sm[tid] += sm[tid +  1];
+	}
+*/
 
-int bx = get_group_id(0);
-int by = get_group_id(1);
+	// southern island 7970M
+/*
+	if ( tid < 8) 
+	{
+		sm[tid] += sm[tid +  8];
+		sm[tid] += sm[tid +  4];
+		sm[tid] += sm[tid +  2];
+		sm[tid] += sm[tid +  1];
+	}
+*/
+	if(tid == 0) 
+	{
+		intersum[bx] = sm[0] + sm[1] + sm[2]  + sm[3]  + sm[4]  + sm[5]  + sm[6]  + sm[7] 
+			         + sm[8] + sm[9] + sm[10] + sm[11] + sm[12] + sm[13] + sm[14] + sm[15];
+		//printf("blk %d, sum = %f\n", bx, intersum[bx]);
+	}
 
-int tx = get_local_id(0);
-int ty = get_local_id(1);
+	barrier(CLK_GLOBAL_MEM_FENCE);
 
-int Row =  bx * TILE + tx;
-int Col =  by * TILE + ty;
-
-float sum = 0.f;	
-
-int m,k ;
-
-for ( m = 0; m < T/TILE ; ++m)
-{
-sma[tx * TILE + ty] = A[Row * T + m * TILE + ty];	
-smb[tx * TILE + ty] = B[(m * TILE + tx) * T + Col];	
-
-barrier(CLK_LOCAL_MEM_FENCE);
-
-
-for ( k = 0; k < TILE ; ++ k) 
-{
-sum += sma[tx * TILE + k] * smb[k * TILE + ty];
-}
-
-barrier(CLK_LOCAL_MEM_FENCE);
-}
-
-C[Row * N + Col] = sum;
+	if( gx == 0 && gy == 0)
+	{
+		v = 0.f;
+		#pragma unroll
+		for ( m = 0; m < blks; ++m)
+		{
+			v += intersum[m];	
+		}
+		sum[0] = v;
+	}
 
 }
- */
+
+
+
+
+
