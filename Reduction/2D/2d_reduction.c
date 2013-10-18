@@ -717,6 +717,7 @@ void run4(int N)
 	if(result != size){ fputs("Reading error", stderr);exit(1);}
 	kernelSource[size] = '\0';
 	
+
 	// Bind to platform
 	err = clGetPlatformIDs(1, &platform, NULL);
 	OCL_CHECK(err);
@@ -744,6 +745,28 @@ void run4(int N)
 	if(err != CL_SUCCESS)
 		printCompilerOutput(program, device_id);
 	OCL_CHECK(err);
+
+
+	// save binary
+#ifdef SAVEBIN
+	// Calculate how big the binary is
+	size_t binary_size;
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binary_size, NULL);
+	OCL_CHECK(err);
+
+	unsigned char* bin;
+	bin = (unsigned char*)malloc(sizeof(unsigned char)*binary_size);
+
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, binary_size, &bin, NULL);
+	OCL_CHECK(err);
+
+	// Print the binary out to the output file
+	fh = fopen("kernel.bin", "wb");    
+	fwrite(bin, 1, binary_size, fh);
+	fclose(fh);
+
+
+#endif
 
 	kernel[0] = clCreateKernel(program, "reduction_4a", &err);
 	OCL_CHECK(err);
@@ -819,7 +842,6 @@ void run4(int N)
 
 #endif
 
-
 	// free
 	clReleaseMemObject(A_d);	
 	clReleaseMemObject(sum_d);
@@ -838,6 +860,9 @@ void run4(int N)
 	free(kernelSource);
 
 
+#ifdef SAVEBIN
+	free(bin);
+#endif
 
 	free(A);
 	free(sum);
