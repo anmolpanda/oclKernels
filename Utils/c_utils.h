@@ -47,6 +47,7 @@ void copy_2d_d(double **a, double **a_pre, int row, int col);
 
 void copy_1d_d(double *from, double *to, int len);
 
+int cmp_2d_f(float *a, float *b, int row, int col);
 
 
 

@@ -1,7 +1,7 @@
 //#pragma OPENCL EXTENSION all : enable
-//#pragma OPENCL EXTENSION cl_amd_printf : enable
+#pragma OPENCL EXTENSION cl_amd_printf : enable
 
-#define TILE 16
+#define TILE 4 
 
 __kernel void transpose_1(
 		__global float *A, 
@@ -22,15 +22,15 @@ __kernel void transpose_1(
 __kernel void transpose_2(
 		__global float *A, 
 		__global float *At, 
-		__local  float *lds, 
-		const int N)
+		__local  float *lds )
 {
-	// square matrix[N][N]
+	// square matrix
+ 	size_t N  = get_global_size(0);
 
 	size_t gx = get_group_id(0);
 	size_t gy = get_group_id(1);
 
-	size_t blks_x = get_num_group(0);	
+	size_t blks_x = get_num_groups(0);	
 
 	// reshuffle blocks
 	size_t giy = gx;
@@ -58,15 +58,17 @@ __kernel void transpose_2(
 	ix = giy * TILE + lix;
 	iy = gix * TILE + liy;
 
+	// transpose the index inside LDS
+	ind = lix * TILE * 4 + liy; 
+
 	int index_out = ix  + iy * N * 4;
 
-	// transpose the index inside LDS
-	ind = liy + lix * TILE * 4; 
+
+
 
 	At[index_out]			= lds[ind];
-	At[index_out + N]		= lds[ind + TILE];
-	At[index_out + N * 2]	= lds[ind + TILE * 2];
-	At[index_out + N * 3]	= lds[ind + TILE * 3];
-
+	At[index_out + N]		= lds[ind + TILE*TILE*4];
+	At[index_out + N * 2]	= lds[ind + TILE*TILE*8];
+	At[index_out + N * 3]	= lds[ind + TILE*TILE*12];
 
 }

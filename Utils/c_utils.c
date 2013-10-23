@@ -378,3 +378,24 @@ void init_1d_d(double *array,  int len, double value)
 }
 
 
+int cmp_2d_f(float *a, float *b, int row, int col)
+{
+	int i,j;
+	int flag = 1;
+	for(i=0;i<row;++i){
+		for(j=0;j<col;++j){
+			if ( b[i * col + j]  != a[i * col + j])
+			{
+				flag = 0;
+				printf("Differece at (%d,%d) a = %f, b = %f\n", i,j,a[i*col+j], b[i*col+j]);
+				break;
+			}
+		}
+	}
+	return flag;
+}
+
+
+
+
+
