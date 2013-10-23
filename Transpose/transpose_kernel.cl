@@ -22,6 +22,7 @@ __kernel void transpose_1(
 __kernel void transpose_2(
 		__global float *A, 
 		__global float *At, 
+		__local  float *lds, 
 		const int N)
 {
 	// square matrix[N][N]
@@ -38,11 +39,34 @@ __kernel void transpose_2(
 	size_t lix = get_local_id(0);
 	size_t liy = get_local_id(1);
 
-	// use reshuffled blks to index the read data
+	// use reshuffled blks to index the reading data
 	size_t ix = gix * TILE + lix; 
 	size_t iy = giy * TILE + liy; 
 
-	size_t index_in = ix + iy * N;
+	size_t index_in = ix + iy * N * 4;
 
+	// copy from global memory to LDS
+	size_t ind = liy * TILE * 4 + lix;
+
+	lds[ind]			=	A[index_in];
+	lds[ind + TILE]		=	A[index_in + N];
+	lds[ind + TILE * 2]	=	A[index_in + N * 2];
+	lds[ind + TILE * 3]	=	A[index_in + N * 3];
+
+	barrier(CLK_LOCAL_MEM_FENCE);
 	
+	ix = giy * TILE + lix;
+	iy = gix * TILE + liy;
+
+	int index_out = ix  + iy * N * 4;
+
+	// transpose the index inside LDS
+	ind = liy + lix * TILE * 4; 
+
+	At[index_out]			= lds[ind];
+	At[index_out + N]		= lds[ind + TILE];
+	At[index_out + N * 2]	= lds[ind + TILE * 2];
+	At[index_out + N * 3]	= lds[ind + TILE * 3];
+
+
 }
