@@ -1,5 +1,5 @@
 //#pragma OPENCL EXTENSION all : enable
-#pragma OPENCL EXTENSION cl_amd_printf : enable
+//#pragma OPENCL EXTENSION cl_amd_printf : enable
 
 #define TILE 16 
 

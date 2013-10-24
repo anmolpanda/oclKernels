@@ -28,9 +28,9 @@ int main (int argc, char *argv[])
 
 	int N = atoi(argv[1]); // row
 
-	run1(N, argv[2]);
+	 run1(N, argv[2]);
 
-	//run2(N, argv[2]);
+	// run2(N, argv[2]);
 
 	return  0;
 }
@@ -134,6 +134,39 @@ void run2(int N, char *fileName)
 		printCompilerOutput(program, device_id);
 	OCL_CHECK(err);
 
+
+
+#ifdef SAVEBIN
+	// Calculate size of binaries 
+	size_t binary_size;
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binary_size, NULL);
+	OCL_CHECK(err);
+
+	//printf("binary size = %ld\n", binary_size);
+
+	unsigned char* bin;
+	bin = (unsigned char*)malloc(sizeof(unsigned char)*binary_size);
+
+
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(unsigned char*) , &bin, NULL);
+	//printf("err = %d\n", err);
+
+	OCL_CHECK(err);
+
+	//puts("save binaries");
+
+	// Print the binary out to the output file
+	fh = fopen("kernel_run2.bin", "wb");
+	fwrite(bin, 1, binary_size, fh);
+	fclose(fh);
+
+	puts("done save binaries");
+
+#endif
+
+
+
+
 	kernel[0] = clCreateKernel(program, "transpose_2", &err);
 	OCL_CHECK(err);
 
@@ -230,6 +263,11 @@ void run2(int N, char *fileName)
 		clReleaseEvent(event[i]);
 	}
 	free(kernelSource);
+
+
+#ifdef SAVEBIN
+	free(bin);
+#endif
 
 
 
@@ -339,6 +377,26 @@ void run1(int N, char *fileName)
 		printCompilerOutput(program, device_id);
 	OCL_CHECK(err);
 
+#ifdef SAVEBIN
+	// Calculate size of binaries 
+	size_t binary_size;
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binary_size, NULL);
+	OCL_CHECK(err);
+
+	unsigned char* bin;
+	bin = (unsigned char*)malloc(sizeof(unsigned char)*binary_size);
+
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(unsigned char*), &bin, NULL);
+	OCL_CHECK(err);
+
+	// Print the binary out to the output file
+	fh = fopen("kernel_run1.bin", "wb");
+	fwrite(bin, 1, binary_size, fh);
+	fclose(fh);
+
+#endif
+
+
 	kernel[0] = clCreateKernel(program, "transpose_1", &err);
 	OCL_CHECK(err);
 
@@ -439,6 +497,9 @@ void run1(int N, char *fileName)
 	free(kernelSource);
 
 
+#ifdef SAVEBIN
+	free(bin);
+#endif
 
 	free(A);
 	free(At);

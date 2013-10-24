@@ -1,5 +1,7 @@
 CC = gcc
-CCFLAGS = -g  -Wall -O3 #-DDEBUG #-DSAVEBIN  
+CCFLAGS = -g  -Wall -O3   
+BINFLAG = -DSAVEBIN 
+DEBUGFLAG = #-DDEBUG
 CL_FLAGS = -lOpenCL 
 OPT = -lm -lrt
 
@@ -54,7 +56,7 @@ ocl_utils.o: ../Utils/ocl_utils.h ../Utils/ocl_utils.c
 # build programs 
 #--------------
 transpose:  transpose.c
-	$(CC) $(CCFLAGS) $(CL_INCLUDE) $(CL_LIBPATH) transpose.c -o transpose ../Utils/c_utils.o  ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
+	$(CC) $(CCFLAGS) $(DEBUGFLAG) $(BINFLAG) $(CL_INCLUDE) $(CL_LIBPATH) transpose.c -o transpose ../Utils/c_utils.o  ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
 
 
 .PHONY: clean
