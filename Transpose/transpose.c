@@ -11,26 +11,26 @@
 #include "../Utils/ocl_utils.h"
 
 
-#define TILE 4 
+#define TILE 16 
 
-void run1(int N); // naive 
+void run1(int N, char *fileName); // naive 
 
-void run2(int N); // optimized 
+void run2(int N, char *fileName); // optimized 
 
 
 
 int main (int argc, char *argv[])
 {
-	if (argc !=  2){
-		printf("Type ./Program N(square matrix width)\n");
+	if (argc !=  3){
+		printf("Type ./Program N(square matrix width) kernelfile.cl \n");
 		exit(1);
 	}	
 
 	int N = atoi(argv[1]); // row
 
-	//run1(N);
+	run1(N, argv[2]);
 
-	run2(N);
+	//run2(N, argv[2]);
 
 	return  0;
 }
@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 // run 2
 //-----------------------------------------------------------
 
-void run2(int N)
+void run2(int N, char *fileName)
 {
 	puts("Optimized Matrix Transpose");
 
@@ -89,7 +89,7 @@ void run2(int N)
 	cl_event *event = (cl_event*)malloc(sizeof(cl_event)*NumE);    
 
 	// read kernel file
-	char *fileName = "transpose_kernel.cl";
+	//char *fileName = "transpose_kernel.cl";
 	char *kernelSource;
 	size_t size;
 	FILE *fh = fopen(fileName, "rb");
@@ -152,8 +152,8 @@ void run2(int N)
 	localsize[1] = TILE;
 
 	// each workitem in [TILE][TILE] will execute [elePerThread1Dim][elePerThread1Dim]
-	globalsize[0] = N/4;
-	globalsize[1] = N/4;
+	globalsize[0] = N;
+	globalsize[1] = N;
 
 	err  = clSetKernelArg(kernel[0], 0, sizeof(cl_mem), &A_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
@@ -161,7 +161,7 @@ void run2(int N)
 	err  = clSetKernelArg(kernel[0], 1, sizeof(cl_mem), &At_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
-	err  = clSetKernelArg(kernel[0], 2, sizeof(float)*TILE*TILE*16, NULL);
+	err  = clSetKernelArg(kernel[0], 2, sizeof(float)*TILE*TILE, NULL);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
 
@@ -240,7 +240,13 @@ void run2(int N)
 }
 
 
-void run1(int N)
+
+
+//-----------------------------------------------------------
+// run 1
+//-----------------------------------------------------------
+
+void run1(int N, char *fileName)
 {
 	puts("Transpose Naive\n");
 
@@ -288,7 +294,7 @@ void run1(int N)
 	cl_event *event = (cl_event*)malloc(sizeof(cl_event)*NumE);    
 
 	// read kernel file
-	char *fileName = "transpose_kernel.cl";
+	//char *fileName = "transpose_kernel.cl";
 	char *kernelSource;
 	size_t size;
 	FILE *fh = fopen(fileName, "rb");

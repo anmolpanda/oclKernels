@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -g  -Wall -O3 -DDEBUG #-DSAVEBIN  
+CCFLAGS = -g  -Wall -O3 #-DDEBUG #-DSAVEBIN  
 CL_FLAGS = -lOpenCL 
 OPT = -lm -lrt
 
@@ -59,4 +59,4 @@ transpose:  transpose.c
 
 .PHONY: clean
 clean:
-	rm -rf $(PROG) ../Utils/*.o 
+	rm -rf $(PROG) ../Utils/*.o  ./profile/result/

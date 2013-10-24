@@ -1,7 +1,7 @@
 //#pragma OPENCL EXTENSION all : enable
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-#define TILE 4 
+#define TILE 16 
 
 __kernel void transpose_1(
 		__global float *A, 
@@ -43,15 +43,12 @@ __kernel void transpose_2(
 	size_t ix = gix * TILE + lix; 
 	size_t iy = giy * TILE + liy; 
 
-	size_t index_in = ix + iy * N * 4;
+	size_t index_in = ix + iy * N; // [iy][ix]
 
 	// copy from global memory to LDS
-	size_t ind = liy * TILE * 4 + lix;
+	size_t ind = liy * TILE  + lix; //[liy][lix]
 
 	lds[ind]			=	A[index_in];
-	lds[ind + TILE]		=	A[index_in + N];
-	lds[ind + TILE * 2]	=	A[index_in + N * 2];
-	lds[ind + TILE * 3]	=	A[index_in + N * 3];
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 	
@@ -59,16 +56,9 @@ __kernel void transpose_2(
 	iy = gix * TILE + liy;
 
 	// transpose the index inside LDS
-	ind = lix * TILE * 4 + liy; 
+	ind = lix * TILE  + liy; // [lix][liy]
 
-	int index_out = ix  + iy * N * 4;
-
-
-
+	int index_out = ix  + iy * N ;
 
 	At[index_out]			= lds[ind];
-	At[index_out + N]		= lds[ind + TILE*TILE*4];
-	At[index_out + N * 2]	= lds[ind + TILE*TILE*8];
-	At[index_out + N * 3]	= lds[ind + TILE*TILE*12];
-
 }
