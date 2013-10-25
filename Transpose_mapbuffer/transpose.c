@@ -47,9 +47,12 @@ void run2(int N, char *fileName)
 
 	int i,j;
 
+	void *A_ptr 	= NULL;
+	void *At_ptr 	= NULL;
+
 	float *A;
 	A = (float*)malloc(sizeof(float)*N*N);
-
+	// initialize data on the host
 	for( i = 0; i < N ; ++i )
 	{
 		for( j = 0; j < N ; ++j )
@@ -68,7 +71,7 @@ void run2(int N, char *fileName)
 #endif
 
 	int NumK = 1;
-	int NumE = 1;
+	int NumE = 3;
 
 	double gpuTime;
 	cl_ulong gstart, gend;
@@ -165,26 +168,59 @@ void run2(int N, char *fileName)
 #endif
 
 
-
-
 	kernel[0] = clCreateKernel(program, "transpose_2", &err);
 	OCL_CHECK(err);
 
-	// memory on device
-	cl_mem A_d    = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
-	cl_mem At_d   = clCreateBuffer(context, CL_MEM_READ_WRITE,  sizeof(float)*N*N,  NULL, NULL);
 
-	// Initialize device memory
-	err = clEnqueueWriteBuffer(queue, A_d, 	CL_TRUE, 0, sizeof(float)*N*N, 	A, 0, NULL , &event[0]); 
+	// memory on device
+	size_t buffer_size = sizeof(float)*N*N;
+
+	cl_mem A_d    = clCreateBuffer(context, CL_MEM_READ_ONLY| CL_MEM_USE_PERSISTENT_MEM_AMD,  buffer_size,  NULL, &err);
+	OCL_CHECK(err);
+	cl_mem At_d   = clCreateBuffer(context, CL_MEM_WRITE_ONLY, buffer_size,  NULL, &err);
 	OCL_CHECK(err);
 
+	// =============================================================================================== //
+	// Map buffers to allocate pointers into these buffers 
+	// =============================================================================================== */
+	A_ptr	=	clEnqueueMapBuffer( queue,
+								A_d,
+								CL_TRUE,
+								CL_MAP_WRITE,
+								0,
+								buffer_size,
+								0,
+								NULL,
+								&event[0],
+								&err);
+
+	OCL_CHECK(err);
+
+	memcpy(A_ptr , A, buffer_size);
+
+	// =============================================================================================== //
+	// Unmap memory buffers , 		prepare kernel execution					                       //
+	// =============================================================================================== //
+	//err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	&event[1]);
+	err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	NULL);
+	OCL_CHECK(err);
+
+	//clFinish(queue);
+	//clFlush(queue);
+	//clWaitForEvents(1, &event[1]);
+
+
+	// =============================================================================================== //
+	// Execution
+	// =============================================================================================== //
+
+	// each workitem in [TILE][TILE] will execute [elePerThread1Dim][elePerThread1Dim]
 	size_t localsize[2];
 	size_t globalsize[2];
 
 	localsize[0] = TILE; 
 	localsize[1] = TILE;
 
-	// each workitem in [TILE][TILE] will execute [elePerThread1Dim][elePerThread1Dim]
 	globalsize[0] = N;
 	globalsize[1] = N;
 
@@ -201,12 +237,37 @@ void run2(int N, char *fileName)
 	err = clEnqueueNDRangeKernel(queue, kernel[0], 2, NULL, globalsize, localsize, 0, NULL, &event[1]);
 	OCL_CHECK(err);
 
+
 	clFinish(queue);
 
-	clEnqueueReadBuffer(queue, At_d, CL_TRUE, 0, sizeof(float)*N*N, At, 0, NULL , &event[2]);
 
-	err = clWaitForEvents(1,&event[2]);
+	// read result
+	At_ptr	= clEnqueueMapBuffer(
+			queue,
+			At_d,
+			CL_TRUE,
+			CL_MAP_READ,
+			0,
+			buffer_size,
+			0,
+			NULL,
+			//&event[3],
+			NULL,
+			&err);
+
 	OCL_CHECK(err);
+
+	//clFlush(queue);
+	//clWaitForEvents(1, &event[3]);
+
+	memcpy(At , At_ptr, buffer_size);
+
+	err = clEnqueueUnmapMemObject(queue, At_d, At_ptr, 0, NULL,	&event[2]);
+	OCL_CHECK(err);
+
+	//clFinish(queue);
+	//clFlush(queue);
+	clWaitForEvents(1, &event[2]);
 
 	err = clGetEventProfilingInfo (event[0], CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &gstart, NULL);
 	OCL_CHECK(err);
