@@ -18,7 +18,7 @@ __kernel void transpose_1(
 
 }
 
-
+// each workitem works on [2x2] matrix elements 
 __kernel void transpose_2(
 		__global float *A, 
 		__global float *At, 
@@ -40,25 +40,39 @@ __kernel void transpose_2(
 	size_t liy = get_local_id(1);
 
 	// use reshuffled blks to index the reading data
-	size_t ix = gix * TILE + lix; 
-	size_t iy = giy * TILE + liy; 
+	size_t ix = gix * TILE * 2  + lix; 
+	size_t iy = giy * TILE * 2  + liy; 
 
-	size_t index_in = ix + iy * N; // [iy][ix]
+
+	size_t index_in00 = ix 			+ iy * N ;        // [iy][ix]
+	size_t index_in01 = (ix + TILE) + iy * N ; 		  // [iy][ix + TILE]
+	size_t index_in10 = ix 			+ (iy+TILE) * N ; // [iy+TILE][ix]
+	size_t index_in11 = (ix + TILE) + (iy+TILE) * N ; // [iy+TILE][ix+TILE]
 
 	// copy from global memory to LDS
-	size_t ind = liy * TILE  + lix; //[liy][lix]
+	size_t ind = liy * TILE + lix; //[liy][lix]
 
-	lds[ind]			=	A[index_in];
+	lds[ind]					=	A[index_in00];	//[liy][lix]
+	lds[ind + TILE]				=	A[index_in01];  //[liy][lix + TILE]
+	lds[ind + TILE * TILE]		=	A[index_in10];  //[liy+TILE][lix]
+	lds[ind + (TILE+1)* TILE]	=	A[index_in11];  //[liy+TILE][lix+TILE]
 
 	barrier(CLK_LOCAL_MEM_FENCE);
 	
-	ix = giy * TILE + lix;
-	iy = gix * TILE + liy;
+	ix = giy * TILE * 2  + lix;
+	iy = gix * TILE * 2  + liy;
 
 	// transpose the index inside LDS
 	ind = lix * TILE  + liy; // [lix][liy]
 
-	int index_out = ix  + iy * N ;
+	int index_out00 = ix  		+ iy * N ;			// [iy][ix]
+	int index_out01 = (ix+TILE) + iy * N ;			// [iy][ix + TILE]
+	int index_out10 = ix  		+ (iy + TILE)* N ;	// [iy+TILE][ix]
+	int index_out11 = (ix+TILE) + (iy + TILE)* N ;	// [iy+TILE][ix+TILE]
 
-	At[index_out]			= lds[ind];
+	At[index_out00]			= lds[ind];
+	At[index_out01]			= lds[ind + TILE];
+	At[index_out10]			= lds[ind + TILE * TILE];
+	At[index_out11]			= lds[ind + (TILE+1) * TILE];
+
 }

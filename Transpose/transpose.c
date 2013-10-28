@@ -185,8 +185,12 @@ void run2(int N, char *fileName)
 	localsize[1] = TILE;
 
 	// each workitem in [TILE][TILE] will execute [elePerThread1Dim][elePerThread1Dim]
-	globalsize[0] = N;
-	globalsize[1] = N;
+	
+	//globalsize[0] = N;
+	//globalsize[1] = N;
+
+	globalsize[0] = N/2;
+	globalsize[1] = N/2;
 
 	err  = clSetKernelArg(kernel[0], 0, sizeof(cl_mem), &A_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
@@ -194,7 +198,7 @@ void run2(int N, char *fileName)
 	err  = clSetKernelArg(kernel[0], 1, sizeof(cl_mem), &At_d);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
-	err  = clSetKernelArg(kernel[0], 2, sizeof(float)*TILE*TILE, NULL);
+	err  = clSetKernelArg(kernel[0], 2, sizeof(float)*TILE*TILE*4, NULL);
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
 
