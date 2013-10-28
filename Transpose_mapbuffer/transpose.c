@@ -175,35 +175,29 @@ void run2(int N, char *fileName)
 	// memory on device
 	size_t buffer_size = sizeof(float)*N*N;
 
-	cl_mem A_d    = clCreateBuffer(context, CL_MEM_READ_ONLY| CL_MEM_USE_PERSISTENT_MEM_AMD,  buffer_size,  NULL, &err);
-	OCL_CHECK(err);
-	cl_mem At_d   = clCreateBuffer(context, CL_MEM_WRITE_ONLY, buffer_size,  NULL, &err);
-	OCL_CHECK(err);
-
 	// =============================================================================================== //
 	// Map buffers to allocate pointers into these buffers 
 	// =============================================================================================== */
-	A_ptr	=	clEnqueueMapBuffer( queue,
-								A_d,
-								CL_TRUE,
-								CL_MAP_WRITE,
-								0,
-								buffer_size,
-								0,
-								NULL,
-								&event[0],
-								&err);
-
+	cl_mem A_d    = clCreateBuffer(context, CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR,  buffer_size,  A, &err);
 	OCL_CHECK(err);
 
-	memcpy(A_ptr , A, buffer_size);
+	A_ptr	=	clEnqueueMapBuffer( queue, A_d, CL_TRUE, CL_MAP_READ, 0, buffer_size, 0, NULL, &event[0], &err);
+	OCL_CHECK(err);
+
+	// output
+	cl_mem At_d   = clCreateBuffer(context, CL_MEM_WRITE_ONLY|CL_MEM_USE_HOST_PTR, buffer_size,  At, &err);
+	OCL_CHECK(err);
+
+	At_ptr	=	clEnqueueMapBuffer( queue, At_d, CL_TRUE, CL_MAP_WRITE, 0, buffer_size, 0, NULL, NULL, &err);
+	OCL_CHECK(err);
+
 
 	// =============================================================================================== //
 	// Unmap memory buffers , 		prepare kernel execution					                       //
 	// =============================================================================================== //
 	//err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	&event[1]);
-	err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	NULL);
-	OCL_CHECK(err);
+	//err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	NULL);
+	//OCL_CHECK(err);
 
 	//clFinish(queue);
 	//clFlush(queue);
@@ -257,13 +251,19 @@ void run2(int N, char *fileName)
 
 	OCL_CHECK(err);
 
-	//clFlush(queue);
-	//clWaitForEvents(1, &event[3]);
-
-	memcpy(At , At_ptr, buffer_size);
+	err = clEnqueueUnmapMemObject(queue, A_d, A_ptr, 0, NULL,	NULL);
+	OCL_CHECK(err);
 
 	err = clEnqueueUnmapMemObject(queue, At_d, At_ptr, 0, NULL,	&event[2]);
 	OCL_CHECK(err);
+
+	//clFlush(queue);
+	//clWaitForEvents(1, &event[3]);
+
+	//memcpy(At , At_ptr, buffer_size);
+
+	//err = clEnqueueUnmapMemObject(queue, At_d, At_ptr, 0, NULL,	&event[2]);
+	//OCL_CHECK(err);
 
 	//clFinish(queue);
 	//clFlush(queue);
