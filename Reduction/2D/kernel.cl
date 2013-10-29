@@ -4,7 +4,7 @@
 
 #define TILE 64
 #define TILE16 16
-
+/*
 __kernel void reduction_1(
 		__global float *A, 
 		__global float *sum,
@@ -70,8 +70,9 @@ __kernel void reduction_1(
 	}
 
 }
+*/
 
-
+/*
 
 __kernel void reduction_2a(
 		__global float *A, 
@@ -123,7 +124,10 @@ __kernel void reduction_2a(
 	}
 
 }
+*/
 
+
+/*
 __kernel void reduction_2b(
 		__global float *sum,
 		__local  volatile float *sm,
@@ -158,8 +162,11 @@ __kernel void reduction_2b(
 		sum[blk] = sm[0];
 	}
 }
+*/
 
 
+
+/*
 __kernel void reduction_3a(
 		__global float *A, 
 		__global float *intersum,
@@ -206,6 +213,10 @@ __kernel void reduction_3a(
 
 }
 
+*/
+
+
+/*
 __kernel void reduction_3b(
 		__global float *intersum,
 		__global float *sum,
@@ -256,6 +267,8 @@ __kernel void reduction_3b(
 	}
 
 }
+*/
+
 
 
 __kernel void reduction_4a(
