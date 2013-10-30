@@ -9,7 +9,7 @@ fi
 
 for (( i = 64 ; i <= 2048 ; i = i * 2 ))
 do
-  echo "Run square matrix [$i][$i]"
+  echo "Run square matrix [$i][$i] and vector[$i]"
 
   if [ -f ./result/job_$i.txt ];
   then
@@ -24,7 +24,7 @@ do
 	
   for (( j = 1 ;  j <= 20 ; j =  j + 1 ))
   do
-   	../transpose $i  ../transpose_kernel.cl >> ./result/job_$i.txt
+   	../mvm $i  ../mvm_kernel.cl >> ./result/job_$i.txt
   done
 
   ./get_gpuTime.sh ./result/job_$i.txt | cut -f1 | sort -nr | tail -1 >> ./result/gpuTime_job_$i.txt

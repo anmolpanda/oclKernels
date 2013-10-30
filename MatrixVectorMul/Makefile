@@ -1,7 +1,7 @@
 CC = gcc
 CCFLAGS = -g  -Wall -O3   
 BINFLAG = #-DSAVEBIN 
-DEBUGFLAG = -DDEBUG
+DEBUGFLAG = #-DDEBUG
 CL_FLAGS = -lOpenCL 
 OPT = -lm -lrt
 
@@ -39,7 +39,7 @@ endif
 SRCS =  $(wildcard *.c)
 PROG =  $(SRCS:.c=)
 
-all: c_utils.o ocl_utils.o mv 
+all: c_utils.o ocl_utils.o mvm 
 
 #--------------
 # build objects
@@ -55,8 +55,8 @@ ocl_utils.o: ../Utils/ocl_utils.h ../Utils/ocl_utils.c
 #--------------
 # build programs 
 #--------------
-mv:  mv.c
-	$(CC) $(CCFLAGS) $(DEBUGFLAG) $(BINFLAG) $(CL_INCLUDE) $(CL_LIBPATH) mv.c -o mv ../Utils/c_utils.o  ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
+mvm:  mvm.c
+	$(CC) $(CCFLAGS) $(DEBUGFLAG) $(BINFLAG) $(CL_INCLUDE) $(CL_LIBPATH) mvm.c -o mvm ../Utils/c_utils.o  ../Utils/ocl_utils.o $(CL_FLAGS) $(OPT)
 
 
 .PHONY: clean

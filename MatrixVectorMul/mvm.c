@@ -428,7 +428,7 @@ void run2(int N, char *fileName)
 	if(err != 0) { printf("%d\n",err); OCL_CHECK(err); exit(1);}
 
 
-	err = clEnqueueNDRangeKernel(queue, kernel[0], 1, NULL, globalsize, localsize, 0, NULL, &event[0]);
+	err = clEnqueueNDRangeKernel(queue, kernel[0], 2, NULL, globalsize, localsize, 0, NULL, &event[0]);
 	OCL_CHECK(err);
 
 	clFinish(queue);

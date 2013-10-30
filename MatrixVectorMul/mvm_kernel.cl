@@ -49,7 +49,7 @@ __kernel void mv_2(
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	// sum across rows
-	if( lx == 0)
+	if( gx == 0)
 	{
 		int start = ly * TILE;
 		C[gy] = lds[start] 		+ lds[start + 1] + lds[start + 2] 	+ lds[start + 3]  + lds[start + 4]  + lds[start + 5]  + lds[start + 6]  + lds[start + 7] + 
@@ -57,3 +57,11 @@ __kernel void mv_2(
 	}
 
 }
+
+// can we improve more?
+
+
+
+
+
+
