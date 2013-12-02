@@ -9,7 +9,7 @@ fi
 
 # read the command options
 
-for (( i = 4096 ; i <= 8192 ; i = i * 2 ))
+for (( i = 256; i <= 4096; i = i * 2 ))
 do
   echo "Run square matrix [$i][$i]"
 

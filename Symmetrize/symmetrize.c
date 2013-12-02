@@ -25,9 +25,9 @@ int main (int argc, char *argv[])
 
 	int N = atoi(argv[1]); // row
 
-	//runProgram_v1(N, argv[2]);
+	runProgram_v1(N, argv[2]);
 
-	runProgram_v2(N, argv[2]);
+	//runProgram_v2(N, argv[2]);
 
 	return  0;
 }

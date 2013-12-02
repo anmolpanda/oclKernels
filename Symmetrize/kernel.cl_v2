@@ -8,10 +8,6 @@ __kernel void kernel_symmetrize(
 		const int blk_rows,
 		const int width)
 {
-
-	__local int2 blkid;
-
-
 	// find the subdiagnoal blocks
 	// for example,
 	// 0 
@@ -33,30 +29,24 @@ __kernel void kernel_symmetrize(
 
 	size_t bn = get_group_id(1); 
 	
-	//int2 blkid;
+	int2 blkid;
+	// find out the blocktag 
+	int i,j;
 	int upper,lower;
-
-	if(lid_x == 0 && lid_y == 0)
+	for(i = 2, lower = 0, upper = 1 ; i <= (blk_rows+1) ; i++)
 	{
-		int i,j;
-		for(i = 2, lower = 0, upper = 1 ; i <= (blk_rows+1) ; i++)
+		if( bn >= lower && bn < upper)
 		{
-			if( bn >= lower && bn < upper)
-			{
-				blkid.y = i-2; // rows
-				blkid.x = bn - lower; // cols
-				break;
-			}
-			else
-			{
-				lower = upper;
-				upper = upper + i;
-			}
+			blkid.y = i-2; // rows
+			blkid.x = bn - lower; // cols
+			break;
+		}
+		else
+		{
+			lower = upper;
+			upper = upper + i;
 		}
 	}
-
-	barrier(CLK_LOCAL_MEM_FENCE);
-
 
 	// find out the block index, like blks(x,y)
 	//if(lid_x == 0 && lid_y == 0)
