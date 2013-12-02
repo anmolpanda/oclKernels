@@ -1,0 +1,100 @@
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012514 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.013552 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012956 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012539 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012541 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012555 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012501 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012532 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012528 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012518 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012548 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012470 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012516 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012483 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012527 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012527 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012523 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012514 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.012508 (s)
+GPU Symmetrize()...
+SquareMatrix[4096][4096]
+
+...launch 32896 blocks[16][16]
+oclTime: kernel execution = 0.028755 (s)

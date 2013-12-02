@@ -1,0 +1,51 @@
+//#pragma OPENCL EXTENSION all : enable
+//#pragma OPENCL EXTENSION cl_amd_printf : enable
+
+#define TILE 16 
+
+__kernel void kernel_symmetrize(
+		__global float *A, 
+		__global float *Aout,
+		const int n)
+{
+	// find the subdiagnoal blocks
+	// for example,
+	// 0 
+	// 1	2
+	// 3	4	5
+	// 6	7	8	9
+
+	size_t gid_x = get_global_id(0);
+	size_t lid_x = get_local_id(0);
+
+	size_t gid_y = get_global_id(1);
+	size_t lid_y = get_local_id(1);
+
+	size_t bn = get_group_id(1); 
+	
+	size_t blk_tag;
+
+	if(lid_y == 0 && lid_x == 0)
+	{
+		printf("block %d\n",bn);
+
+		// the output should be n rows
+		int i,j;
+		int upper,lower;
+		for(i = 2, lower = 0, upper = 1 ; i <= (n+1) ; i++)
+		{
+			if( bn >= lower && bn < upper)
+			{
+				blk_tag = i-2;
+				break;
+			}
+			else
+			{
+				lower = upper;
+				upper = upper + i;
+			}
+		}
+
+		printf("block tag %zu\n", blk_tag);
+	}
+}

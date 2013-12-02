@@ -100,7 +100,8 @@ void check_2d_f(float *array,   int row,   int col)
 	{
 		for(j=0;j<col;++j)
 		{
-			printf("%10.5f ",array[i*col + j]);	
+			//printf("%10.5f ",array[i*col + j]);	
+			printf("%3.f ",array[i*col + j]);	
 
 		}
 		printf("\n");
